@@ -1,0 +1,25 @@
+OBJDIRS += kern
+
+KERN_SRCFILES := entry.S init.rs
+
+KERN_OBJS := $(patsubst %.S, $(OBJDIR)/kern/%.o, $(KERN_SRCFILES))
+KERN_OBJS := $(patsubst %.rs, $(OBJDIR)/kern/%.o, $(KERN_OBJS))
+
+$(OBJDIR)/kern/%.o: kern/%.S
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -nostdinc -c -o $@ $<
+
+$(OBJDIR)/kern/%.o: kern/%.rs
+	@mkdir -p $(@D)
+	$(RUSTC) $(RUSTFLAGS) -c -o $@ $<
+
+$(OBJDIR)/kern/kernel: $(KERN_OBJS) kern/kernel.ld
+	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel.ld -nostdlib $(KERN_OBJS)
+
+$(OBJDIR)/kern/kernel.img: $(OBJDIR)/boot/boot $(OBJDIR)/kern/kernel
+	dd if=/dev/zero of=$(OBJDIR)/kern/kernel.img~ count=10000 2>/dev/null
+	dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/kern/kernel.img~ conv=notrunc 2>/dev/null
+	dd if=$(OBJDIR)/kern/kernel of=$(OBJDIR)/kern/kernel.img~ seek=1 conv=notrunc 2>/dev/null
+	mv $(OBJDIR)/kern/kernel.img~ $(OBJDIR)/kern/kernel.img
+
+all: $(OBJDIR)/kern/kernel.img
