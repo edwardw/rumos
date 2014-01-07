@@ -45,7 +45,7 @@ spin:
     jmp spin
 
 # LLVM generates prologue code for every function which may call into
-# __morestack. It does has 'naked' attribute for functions to disable
+# __morestack. It does have 'naked' attribute for functions to disable
 # prologue code. Until rustc makes use of that attribute, this stub
 # is needed to keep rustc happy.
 # Check out

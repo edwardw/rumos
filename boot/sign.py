@@ -4,6 +4,7 @@ import sys, os
 sz = os.path.getsize(sys.argv[1])
 if sz > 510:
     print "boot block too large: %d bytes (max 510)" % sz
+    exit(1)
 else:
     print "boot block is %d bytes (max 510)" % sz
     with open(sys.argv[1], 'ab+') as f:

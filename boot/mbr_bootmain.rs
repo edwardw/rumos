@@ -36,7 +36,6 @@ struct Proghdr64 {
 mod rusti {
     extern "rust-intrinsic" {
         pub fn size_of<T>() -> uint;
-        pub fn transmute<T,U>(e: T) -> U;
     }
 }
 
@@ -46,16 +45,12 @@ pub extern "C" fn bootmain(elfhdr: *mut Elf64) -> u32 {
         let mut ph: *Proghdr64;
 
         // Read off one page of the kernel.
-        readseg(rusti::transmute(elfhdr), 4096, 0);
+        readseg(elfhdr as u32, 4096, 0);
 
-        ph = rusti::transmute(
-            rusti::transmute::<*mut Elf64, u32>(elfhdr) +
-            (*elfhdr).e_phoff as u32);
+        ph = (elfhdr as u32 + (*elfhdr).e_phoff as u32) as *Proghdr64;
         while (*elfhdr).e_phnum > 0 {
             readseg((*ph).p_pa as u32, (*ph).p_memsz as u32, (*ph).p_offset as u32);
-            ph = rusti::transmute(
-                rusti::transmute::<*Proghdr64, u32>(ph) +
-                rusti::size_of::<Proghdr64>() as u32);
+            ph = (ph as u32 + rusti::size_of::<Proghdr64>() as u32) as *Proghdr64;
             (*elfhdr).e_phnum -= 1;
         }
 
@@ -72,8 +67,12 @@ unsafe fn readseg(pa: u32, count: u32, offset: u32) {
     let addr = pa & !(512 - 1);
     // Translate bytes to sectors, and kernel starts at sector 1
     let start_sect = (offset >> 9) + 1;
-    // Round up to the sector boundary
-    let nsect = (count >> 9) + if count&512==0 { 0 } else { 1 };
+    // Round up to the sector boundary.
+    // The more precise way is
+    //      (count >> 9) + if count%512==0 { 0 } else { 1 }
+    // but the code will exceed 510-bytes limitation! So always read
+    // one more sector to be safe.
+    let nsect = (count >> 9) + 1;
     let mut i = 0;
     while i < nsect {
         readsect(addr + 512 * i, start_sect + i);
@@ -127,72 +126,3 @@ unsafe fn insl(port: u16, mut addr: u32, mut cnt: int) {
         : "memory", "cc"
         : "volatile");
 }
-
-/*
- * Unfortunately, INT 13H only work in real mode.
-//
-// Disk Address Packet
-//  https://en.wikipedia.org/wiki/Int_13h
-//
-#[packed]
-struct DAP {
-    sz          : u16,
-    nsect       : u16,
-    offset      : u16,
-    seg         : u16,
-    start_sect  : u64,
-}
-
-#[no_mangle]
-pub extern "C" fn bootmain(elfhdr: *Elf64) -> u32 {
-    unsafe {
-        let mut ph: *Proghdr64;
-
-        // Read the first page of the kernel.
-        readseg(rusti::transmute(elfhdr), 4096, 0);
-
-        let mut i = 0;
-        ph = rusti::transmute(rusti::transmute::<*Elf64, u32>(elfhdr)
-            + (*elfhdr).e_phoff as u32);
-        while i < (*elfhdr).e_phnum {
-            readseg((*ph).p_pa as u32, (*ph).p_memsz as u32,
-                (*ph).p_offset as u32);
-            ph = rusti::transmute(rusti::transmute::<*Proghdr64, u32>(ph)
-                + rusti::size_of::<Proghdr64>() as u32);
-            i += 1;
-        }
-
-        (*elfhdr).e_entry as u32
-    }
-}
-
-//
-// Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
-// Might copy more than asked.
-//
-unsafe fn readseg(pa: u32, count: u32, offset: u32) {
-    // Translate bytes to sectors, and kernel starts at sector 1
-    let start_sect = (offset >> 9) + 1;
-    // Round up to the sector boundary
-    let nsect = (count >> 9) + if count&512==0 { 0 } else { 1 };
-    // Round down to the sector boundary
-    let addr = pa & !(512 - 1);
-    
-    // 0x80 = the first HDD
-    readsect(0x80, start_sect, nsect as u16, addr);
-}
-
-//
-// Read 'nsect' sectors from HDD 'driver' starting from the 'start_sect'
-// sector, and copy the data into physical address 'pa'.
-//
-unsafe fn readsect(driver: u8, start_sect: u32, nsect: u16, pa: u32) {
-    let dap = DAP {sz: 16, nsect: nsect, offset: pa as u16, seg: 0, start_sect: start_sect as u64};
-    asm!("int $0;"
-        :
-        : "i" (0x13), "{ah}" (0x42), "{dl}" (driver),
-            "{Si}" (rusti::transmute::<*DAP, u32>(&dap))
-        : "memory", "cc"
-        : "volatile");
-}
-*/

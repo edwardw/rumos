@@ -16,4 +16,4 @@ $(OBJDIR)/boot/%.o: boot/%.rs
 $(OBJDIR)/boot/boot: $(BOOT_OBJS)
 	$(LD) -m elf_i386 -e start -Ttext 0x7C00 -o $@.out $^
 	$(OBJCOPY) -S -O binary -j .text $@.out $@
-	python sign.py $@
+	python boot/sign.py $@
