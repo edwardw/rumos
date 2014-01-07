@@ -11,7 +11,7 @@ $(OBJDIR)/boot/%.o: boot/%.S
 
 $(OBJDIR)/boot/%.o: boot/%.rs
 	@mkdir -p $(@D)
-	$(RUSTC) -O --target i386-pc-linux -c -o $@ $<
+	$(RUSTC) -O --target i386-pc-linux -c --out-dir $(@D) $<
 
 $(OBJDIR)/boot/boot: $(BOOT_OBJS)
 	$(LD) -m elf_i386 -e start -Ttext 0x7C00 -o $@.out $^

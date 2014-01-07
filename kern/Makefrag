@@ -11,7 +11,7 @@ $(OBJDIR)/kern/%.o: kern/%.S
 
 $(OBJDIR)/kern/%.o: kern/%.rs
 	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) -c -o $@ $<
+	$(RUSTC) $(RUSTFLAGS) -c --out-dir $(@D) $<
 
 $(OBJDIR)/kern/kernel: $(KERN_OBJS) kern/kernel.ld
 	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel.ld -nostdlib $(KERN_OBJS)
