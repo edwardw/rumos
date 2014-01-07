@@ -49,7 +49,7 @@ start64:
     # Set up the stack and call into rust
     movq    $start32, %rsp
     movq    $0, %fs:0x70
-    call    x86_64_init
+    call    init
 
     # Spin if init returns (it shouldn't).
 spin:
