@@ -5,11 +5,14 @@ KERN_SRCFILES := entry.S
 KERN_OBJS := $(patsubst %.S, $(OBJDIR)/kern/%.o, $(KERN_SRCFILES))
 KERN_OBJS := $(patsubst %.rs, $(OBJDIR)/kern/%.o, $(KERN_OBJS))
 
+KERN_DEPS := $(OBJDIR)/arch/$(RLIB_ARCH) \
+	$(OBJDIR)/rust-core/$(RLIB_CORE)
+
 $(OBJDIR)/kern/%.o: kern/%.S
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -nostdinc -c -o $@ $<
 
-$(OBJDIR)/kern/$(LIB_KERN): kern/init.rs $(OBJDIR)/arch/$(RLIB_ARCH)
+$(OBJDIR)/kern/$(LIB_KERN): kern/init.rs $(KERN_DEPS)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --ar $(AR) --out-dir $(@D) kern/init.rs
 

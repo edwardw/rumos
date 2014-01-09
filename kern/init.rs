@@ -11,8 +11,8 @@ pub extern "C" fn init() {
     use arch::drivers::vga;
     use arch::rusti;
 
+    vga::init();
     unsafe {
-        vga::init();
         let mut i = 0;
         let msg = rusti::transmute::<&'static str, &'static [u8]>(SPLASH);
         while i < 52 {

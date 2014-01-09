@@ -10,7 +10,7 @@ RUSTC := rustc
 
 CFLAGS := $(CFLAGS) -O1 -I$(TOP)
 
-RUSTFLAGS := -O --target x86_64-pc-linux -L $(OBJDIR)/arch --save-temps
+RUSTFLAGS := -O --target x86_64-linux-gnu -L $(OBJDIR)/arch --save-temps
 
 LDFLAGS :=
 
@@ -20,6 +20,7 @@ OBJDIRS :=
 # List of library names
 LIB_MORESTACK := libmorestack.a
 RLIB_ARCH := libarch-5a75d89e-0.0.rlib
+RLIB_CORE := libcore-2e829c2f-0.0.rlib
 LIB_KERN := libkern-3eb67be4-0.0.a
 
 # All must be the first target
@@ -60,6 +61,10 @@ qemu-gdb: $(IMAGES) pre-qemu
 
 clean:
 	rm -rf $(OBJDIR)
+
+$(OBJDIR)/rust-core/$(RLIB_CORE): $(wildcard rust-core/core/*.rs)
+	@mkdir -p $(@D)
+	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-core/core/lib.rs
 
 $(OBJDIR)/.deps:
 	@mkdir -p $(@D)
