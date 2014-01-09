@@ -14,4 +14,4 @@ The plan is to make virtual memory and kernel thread work and boot a NetBSD rump
 
 + A cross compiler tool-chain for your platform. The makefile currently expects ``x86_64-pc-netbsd-{gcc,ld,objcopy}``. There's a script ``misc/build-holy-triad.sh`` to help build them for you.
 
-[rumos_boot]: http://i.imgur.com/AM2MWDP.jpg
+[rumos_boot]: http://i.imgur.com/zWx6kgK.jpg

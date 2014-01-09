@@ -4,7 +4,8 @@ ARCH_SRCFILES := $(wildcard arch/*.rs) \
 	$(wildcard arch/cpu/*.rs) \
 	$(wildcard arch/drivers/*.rs)
 ARCH_DEPS := $(OBJDIR)/arch/$(LIB_MORESTACK) \
-	$(OBJDIR)/rust-core/$(RLIB_CORE)
+	$(OBJDIR)/rust-core/$(RLIB_CORE) \
+	$(OBJDIR)/rust-std/$(RLIB_STD)
 
 $(OBJDIR)/arch/morestack.o: arch/morestack.S
 	@mkdir -p $(@D)

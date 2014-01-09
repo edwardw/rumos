@@ -1,25 +1,33 @@
 #[crate_id="kern"];
 #[crate_type="staticlib"];
 #[no_std];
+#[feature(globs)];
 
 extern mod core;
+extern mod std;
 extern mod arch;
 
-static SPLASH: &'static str = "2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 4 + 2!";
+use std::prelude::*;
+
+static SPLASH0: &'static str = "    ____                  ____  _____\n";
+static SPLASH1: &'static str = "   / __ \\__  ______ ___  / __ \\/ ___/\n";
+static SPLASH2: &'static str = "  / /_/ / / / / __ `__ \\/ / / /\\__ \\\n";
+static SPLASH3: &'static str = " / _, _/ /_/ / / / / / / /_/ /___/ /\n";
+static SPLASH4: &'static str = "/_/ |_|\\__,_/_/ /_/ /_/\\____//____/\n";
+
+static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 4 + 2!\n";
 
 #[no_mangle]
 pub extern "C" fn init() {
-    use core::str;
-    use core::container::Container;
     use arch::drivers::vga;
 
     vga::init();
-    let mut i = 0;
-    let msg = str::as_bytes(SPLASH);
-    while i < (&SPLASH).len() {
-        vga::putc(msg[i] as char, vga::LightGreen);
-        i += 1;
-    }
+    vga::puts(SPLASH0, term::color::WHITE);
+    vga::puts(SPLASH1, term::color::WHITE);
+    vga::puts(SPLASH2, term::color::WHITE);
+    vga::puts(SPLASH3, term::color::WHITE);
+    vga::puts(SPLASH4, term::color::WHITE);
+    vga::puts(FORTUNE, term::color::BRIGHT_GREEN);
 
     loop {}
 }

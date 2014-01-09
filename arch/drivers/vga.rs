@@ -1,4 +1,4 @@
-use core::mem;
+use std::prelude::*;
 use cpu;
 use cpu::io;
 
@@ -6,25 +6,6 @@ use cpu::io;
 pub struct character {
     char: u8,
     attr: u8,
-}
-
-pub enum Color {
-    Black       = 0,
-    Blue        = 1,
-    Green       = 2,
-    Cyan        = 3,
-    Red         = 4,
-    Pink        = 5,
-    Brown       = 6,
-    LightGray   = 7,
-    DarkGray    = 8,
-    LightBlue   = 9,
-    LightGreen  = 10,
-    LightCyan   = 11,
-    LightRed    = 12,
-    LightPink   = 13,
-    Yellow      = 14,
-    White       = 15,
 }
 
 static SCREEN_ROWS: uint = 25;
@@ -40,24 +21,37 @@ pub fn init() {
     }
 }
 
-pub fn putc(c: char, attr: Color) {
+pub fn puts (string: &str, attr: term::color::Color) {
+    stdio::puts(string, attr, putc, new_line);
+}
+
+pub fn putc(c: char, attr: term::color::Color) {
     unsafe {
         put_char(cur_pos, character{char: c as u8, attr: attr as u8});
-        cur_pos += 1;
-
-        if cur_pos >= SCREEN_SIZE {
-            cpu::memmove(mem_ptr_of(0, 0), mem_ptr_of(1, 0),
-                (SCREEN_SIZE - SCREEN_COLS) * mem::size_of::<character>());
-            let mut i = SCREEN_SIZE - SCREEN_COLS;
-            while i < SCREEN_SIZE {
-                put_char(i, character{char: ' ' as u8, attr: White as u8});
-                i += 1;
-            };
-            cur_pos -= SCREEN_COLS;
-        }
-
-        cursor_to(cur_pos);
+        cursor_move(1);
     }
+}
+
+pub fn new_line() {
+    unsafe {
+        cursor_move(SCREEN_COLS - cur_pos % SCREEN_COLS);
+    }
+}
+
+#[inline]
+unsafe fn cursor_move(delta: uint) {
+    cur_pos += delta;
+    if cur_pos >= SCREEN_SIZE {
+        cpu::memmove(mem_ptr_of(0, 0), mem_ptr_of(1, 0),
+            (SCREEN_SIZE - SCREEN_COLS) * mem::size_of::<character>());
+        let mut i = SCREEN_SIZE - SCREEN_COLS;
+        while i < SCREEN_SIZE {
+            put_char(i, character{char: ' ' as u8, attr: term::color::BLACK as u8});
+            i += 1;
+        };
+        cur_pos -= SCREEN_COLS;
+    }
+    cursor_to(cur_pos);
 }
 
 #[inline]
