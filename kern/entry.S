@@ -47,17 +47,14 @@ start32:
     .code64
 start64:
     # Set up the stack and call into rust
-    movq    $start32, %rsp
+    movq    $bootstacktop, %rsp
+    movq    $0, %rbp
     movq    $0, %fs:0x70
     call    init
 
     # Spin if init returns (it shouldn't).
 spin:
     jmp     spin
-
-.global __morestack
-__morestack:
-    ret
 
 .data
 
@@ -94,3 +91,8 @@ entry_pd:
 #    .space  PG4K_SIZE
 #entry_pt_2:
 #    .space  PG4K_SIZE
+.globl      bootstack
+bootstack:
+    .space      PG4K_SIZE
+.globl      bootstacktop
+bootstacktop:

@@ -1,5 +1,5 @@
-use super::super::cpu;
-use super::super::cpu::io;
+use cpu;
+use cpu::io;
 use rusti;
 
 #[packed]

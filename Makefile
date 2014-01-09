@@ -1,19 +1,26 @@
 OBJDIR := obj
 TOP := .
 
-CC := x86_64-pc-netbsd-gcc
+TARGET := x86_64-pc-netbsd
+CC := $(TARGET)-gcc
+LD := $(TARGET)-ld
+AR := $(TARGET)-ar
+OBJCOPY := $(TARGET)-objcopy
 RUSTC := rustc
-LD := x86_64-pc-netbsd-ld
-OBJCOPY := x86_64-pc-netbsd-objcopy
 
 CFLAGS := $(CFLAGS) -O1 -I$(TOP)
 
-RUSTFLAGS := -O --target x86_64-pc-linux
+RUSTFLAGS := -O --target x86_64-pc-linux -L $(OBJDIR)/arch --save-temps
 
-LDFLAGS := -m elf_x86_64
+LDFLAGS :=
 
 # Lists that the */Makefrag makefile fragments will add to
 OBJDIRS :=
+
+# List of library names
+LIB_MORESTACK := libmorestack.a
+RLIB_ARCH := libarch-5a75d89e-0.0.rlib
+LIB_KERN := libkern-3eb67be4-0.0.a
 
 # All must be the first target
 all:
@@ -26,6 +33,7 @@ all:
 
 include boot/Makefrag
 include kern/Makefrag
+include arch/Makefrag
 
 # try to generate a unique GDB port
 GDBPORT	:= $(shell expr `id -u` % 5000 + 25000)

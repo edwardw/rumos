@@ -1,29 +1,15 @@
+#[crate_id="kern"];
 #[crate_type="staticlib"];
 #[no_std];
-#[feature(asm)];
 
-#[path="../arch"]
-mod arch {
-    pub mod cpu;
-    pub mod drivers;
-}
-
-mod rusti {
-    extern "rust-intrinsic" {
-        pub fn size_of<T>() -> uint;
-        pub fn transmute<T,U>(e: T) -> U;
-    }
-}
+extern mod arch;
 
 static SPLASH: &'static str = "2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 4 + 2!";
-
-#[cold]
-#[lang="fail_bounds_check"]
-fn fail_bounds_check(_: *u8, _: uint, _: uint, _: uint) {}
 
 #[no_mangle]
 pub extern "C" fn init() {
     use arch::drivers::vga;
+    use arch::rusti;
 
     unsafe {
         vga::init();
