@@ -10,7 +10,8 @@ RUSTC := rustc
 
 CFLAGS := $(CFLAGS) -O1 -I$(TOP)
 
-RUSTFLAGS := -O --target x86_64-linux-gnu -L $(OBJDIR)/arch --save-temps
+RUSTFLAGS := -O --target x86_64-linux-gnu --save-temps
+RUSTFLAGS += -L $(OBJDIR)/arch -L $(OBJDIR)/rust-core
 
 LDFLAGS :=
 

@@ -1,6 +1,6 @@
+use core::mem;
 use cpu;
 use cpu::io;
-use rusti;
 
 #[packed]
 pub struct character {
@@ -47,7 +47,7 @@ pub fn putc(c: char, attr: Color) {
 
         if cur_pos >= SCREEN_SIZE {
             cpu::memmove(mem_ptr_of(0, 0), mem_ptr_of(1, 0),
-                (SCREEN_SIZE - SCREEN_COLS) * rusti::size_of::<character>());
+                (SCREEN_SIZE - SCREEN_COLS) * mem::size_of::<character>());
             let mut i = SCREEN_SIZE - SCREEN_COLS;
             while i < SCREEN_SIZE {
                 put_char(i, character{char: ' ' as u8, attr: White as u8});
@@ -86,6 +86,6 @@ unsafe fn cursor_to(pos: uint) {
 #[inline]
 unsafe fn mem_ptr_of(row: uint, col: uint) -> uint {
     screen as uint +
-    row * SCREEN_COLS * rusti::size_of::<character>() +
-    col * rusti::size_of::<character>()
+    row * SCREEN_COLS * mem::size_of::<character>() +
+    col * mem::size_of::<character>()
 }

@@ -2,23 +2,23 @@
 #[crate_type="staticlib"];
 #[no_std];
 
+extern mod core;
 extern mod arch;
 
 static SPLASH: &'static str = "2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 4 + 2!";
 
 #[no_mangle]
 pub extern "C" fn init() {
+    use core::str;
+    use core::container::Container;
     use arch::drivers::vga;
-    use arch::rusti;
 
     vga::init();
-    unsafe {
-        let mut i = 0;
-        let msg = rusti::transmute::<&'static str, &'static [u8]>(SPLASH);
-        while i < 52 {
-            vga::putc(msg[i] as char, vga::LightGreen);
-            i += 1;
-        }
+    let mut i = 0;
+    let msg = str::as_bytes(SPLASH);
+    while i < (&SPLASH).len() {
+        vga::putc(msg[i] as char, vga::LightGreen);
+        i += 1;
     }
 
     loop {}
