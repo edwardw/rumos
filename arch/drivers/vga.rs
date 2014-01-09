@@ -21,7 +21,7 @@ pub fn init() {
     }
 }
 
-pub fn puts (string: &str, attr: term::color::Color) {
+pub fn puts(string: &str, attr: term::color::Color) {
     stdio::puts(string, attr, putc, new_line);
 }
 

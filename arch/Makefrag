@@ -15,7 +15,6 @@ $(OBJDIR)/arch/$(LIB_MORESTACK): $(OBJDIR)/arch/morestack.o
 	$(AR) crus $@ $<
 
 $(OBJDIR)/arch/$(RLIB_ARCH): $(ARCH_SRCFILES) $(ARCH_DEPS)
-	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) --ar $(AR) --out-dir $(@D) arch/mod.rs
+	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) arch/mod.rs
 
 all: $(OBJDIR)/arch/$(RLIB_ARCH)
