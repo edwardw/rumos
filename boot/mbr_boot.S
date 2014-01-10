@@ -32,7 +32,8 @@ start32:
 
     # Set up the stack and call into Rust
     movl    $start, %esp
-    push    $0x10000   # argv0 for bootmain, the scratch space
+    push    $0x10000    # argv1 for bootmain, the scratch space
+    push    $0x1        # argv0 for bootmain, kernel starts ar sector 1
     # It seems (%gs:0x30) is where rust stores the value of stack bottom.
     # Set it to zero to convince rust there's enough stack space.
     movl    $0, %gs:0x30

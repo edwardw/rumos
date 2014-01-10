@@ -87,13 +87,13 @@
 #define PDE_SHIFT       21
 #define PTE_SHIFT       12
 // PML4 index of a linear address
-#define PML4X(la)       ((((uintptr_t) la) >> PML4E_SHIFT) & 0x1FF)
+#define PML4X(la)       (((((uintptr_t) la) & 0xFFFFFFFFFFFF) >> PML4E_SHIFT) & 0x1FF)
 // PDP index of a linear address
-#define PDPX(la)        ((((uintptr_t) la) >> PDPE_SHIFT) & 0x1FF)
+#define PDPX(la)        (((((uintptr_t) la) & 0xFFFFFFFFFFFF) >> PDPE_SHIFT) & 0x1FF)
 // PDE index of a linear address
-#define PDEX(la)        ((((uintptr_t) la) >> PDE_SHIFT) & 0x1FF)
+#define PDEX(la)        (((((uintptr_t) la) & 0xFFFFFFFFFFFF) >> PDE_SHIFT) & 0x1FF)
 // PTE  infex of a linear address
-#define PTEX(la)        ((((uintptr_t) la) >> PTE_SHIFT) & 0x1FF)
+#define PTEX(la)        (((((uintptr_t) la) & 0xFFFFFFFFFFFF) >> PTE_SHIFT) & 0x1FF)
 // Offset in the page
 #define PG4K_OFF        (((uintptr_t) la) && 0x3FFFFF)
 #define PG2M_OFF        (((uintptr_t) la) && 0x7FFFFFFF)

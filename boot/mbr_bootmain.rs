@@ -40,16 +40,16 @@ mod rusti {
 }
 
 #[no_mangle]
-pub extern "C" fn bootmain(elfhdr: *mut Elf64) -> u32 {
+pub extern "C" fn bootmain(sect_offset: u32, elfhdr: *mut Elf64) -> u32 {
     unsafe {
         let mut ph: *Proghdr64;
 
         // Read off one page of the kernel.
-        readseg(elfhdr as u32, 4096, 0);
+        readseg(sect_offset, elfhdr as u32, 4096, 0);
 
         ph = (elfhdr as u32 + (*elfhdr).e_phoff as u32) as *Proghdr64;
         while (*elfhdr).e_phnum > 0 {
-            readseg((*ph).p_pa as u32, (*ph).p_memsz as u32, (*ph).p_offset as u32);
+            readseg(sect_offset, (*ph).p_pa as u32, (*ph).p_memsz as u32, (*ph).p_offset as u32);
             ph = (ph as u32 + rusti::size_of::<Proghdr64>() as u32) as *Proghdr64;
             (*elfhdr).e_phnum -= 1;
         }
@@ -62,11 +62,11 @@ pub extern "C" fn bootmain(elfhdr: *mut Elf64) -> u32 {
 // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
 // Might copy more than asked.
 //
-unsafe fn readseg(pa: u32, count: u32, offset: u32) {
+unsafe fn readseg(sect_offset: u32, pa: u32, count: u32, offset: u32) {
     // Round down to the sector boundary
     let addr = pa & !(512 - 1);
-    // Translate bytes to sectors, and kernel starts at sector 1
-    let start_sect = (offset >> 9) + 1;
+    // Translate bytes to sectors
+    let start_sect = (offset >> 9) + sect_offset;
     // Round up to the sector boundary.
     // The more precise way is
     //      (count >> 9) + if count%512==0 { 0 } else { 1 }
