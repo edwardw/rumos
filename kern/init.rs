@@ -1,4 +1,4 @@
-#[crate_id="kern"];
+#[crate_id="kern64"];
 #[crate_type="staticlib"];
 #[no_std];
 #[feature(globs)];

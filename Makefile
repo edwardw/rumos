@@ -23,7 +23,7 @@ LIB_MORESTACK := libmorestack.a
 RLIB_CORE := libcore-2e829c2f-0.0.rlib
 RLIB_STD := libstd-64b22b00-0.0.rlib
 RLIB_ARCH := libarch-5a75d89e-0.0.rlib
-LIB_KERN := libkern-3eb67be4-0.0.a
+LIB_KERN64 := libkern64-cfc1451f-0.0.a
 
 # All must be the first target
 all:
