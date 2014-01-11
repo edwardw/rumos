@@ -22,7 +22,7 @@ SECTIONS
 	. = ALIGN(0x1000);
 
 	.data : {
-		*(.data)
+		*(.data .data.*)
 	}
 
 	PROVIDE(edata = .);
@@ -32,4 +32,8 @@ SECTIONS
 	}
 
 	PROVIDE(end = .);
+
+	/DISCARD/ : {
+		*(.eh_frame)
+	}
 }

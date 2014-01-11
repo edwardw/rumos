@@ -20,6 +20,17 @@ static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 
 #[no_mangle]
 pub extern "C" fn init() {
     use arch::drivers::vga;
+    use arch::cpu;
+
+    // Use linker provided symbols to zero the bss section, so the kernel is
+    // properly loaded.
+    extern {
+        static edata: u64;
+        static end: u64;
+    }
+    unsafe {
+        cpu::memset(edata as uint, 0, (end - edata) as uint);
+    }
 
     vga::init();
     vga::puts(SPLASH0, term::color::WHITE);
