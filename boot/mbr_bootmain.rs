@@ -39,6 +39,13 @@ mod rusti {
     }
 }
 
+//
+// Load kernel from the first HDD starting at sector 'sect_offset'.
+//
+// The loader expects the following:
+//      1. The kernel is in the ELF64 format.
+//      2. Each program header section starts at 512-bytes boundary.
+//
 #[no_mangle]
 pub extern "C" fn bootmain(sect_offset: u32, elfhdr: *mut Elf64) -> u32 {
     unsafe {
@@ -63,19 +70,13 @@ pub extern "C" fn bootmain(sect_offset: u32, elfhdr: *mut Elf64) -> u32 {
 // Might copy more than asked.
 //
 unsafe fn readseg(sect_offset: u32, pa: u32, count: u32, offset: u32) {
-    // Round down to the sector boundary
-    let addr = pa & !(512 - 1);
     // Translate bytes to sectors
     let start_sect = (offset >> 9) + sect_offset;
-    // Round up to the sector boundary.
-    // The more precise way is
-    //      (count >> 9) + if count%512==0 { 0 } else { 1 }
-    // but the code will exceed 510-bytes limitation! So always read
-    // one more sector to be safe.
+    // Always read one more sector to be safe
     let nsect = (count >> 9) + 1;
     let mut i = 0;
     while i < nsect {
-        readsect(addr + 512 * i, start_sect + i);
+        readsect(pa + 512 * i, start_sect + i);
         i += 1;
     }
 }

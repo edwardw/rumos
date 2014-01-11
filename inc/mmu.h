@@ -116,10 +116,13 @@
 
 // Bootloader loads rumos kernel into here initially in 32-bit
 // protected mode.
-// Must match kern/kernel.ld.
-#define KERN32_TEXT     0x100000
+// Must match kern/kernel32.ld.
+#define STAGE1_TEXT     0x100000
+// The final physical address of the 64-bit kernel.
+// Must match kern/kernel64.ld.
+#define STAGE2_TEXT     0x200000
 
-// Rumos has a 'higher half' kernel
+// The virtual address of the Rumos kernel, it is a higher half one.
 #define KERN_TEXT       0xFFFFFFFFFB800000
 
 #endif // RUMOS_INC_MMU_H
