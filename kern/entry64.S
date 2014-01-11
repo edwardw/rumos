@@ -1,7 +1,5 @@
 #include <inc/mmu.h>
 
-    .p2align 4
-.text
 .global start64
     .code64
 start64:
@@ -22,9 +20,7 @@ spin:
 
 .data
 
-.p2align PG4K_SHIFT
-.globl      bootstack
+    .p2align PG4K_SHIFT
 bootstack:
     .space      PG4K_SIZE
-.globl      bootstacktop
 bootstacktop:

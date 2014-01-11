@@ -24,7 +24,7 @@ $(OBJDIR)/kern/kernel.img: $(OBJDIR)/boot/boot $(OBJDIR)/kern/kernel32 $(OBJDIR)
 	dd if=/dev/zero of=$(OBJDIR)/kern/kernel.img~ count=10000 2>/dev/null
 	dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/kern/kernel.img~ conv=notrunc 2>/dev/null
 	dd if=$(OBJDIR)/kern/kernel32 of=$(OBJDIR)/kern/kernel.img~ seek=1 conv=notrunc 2>/dev/null
-	dd if=$(OBJDIR)/kern/kernel64 of=$(OBJDIR)/kern/kernel.img~ seek=129 conv=notrunc 2>/dev/null
+	dd if=$(OBJDIR)/kern/kernel64 of=$(OBJDIR)/kern/kernel.img~ seek=65 conv=notrunc 2>/dev/null
 	mv $(OBJDIR)/kern/kernel.img~ $(OBJDIR)/kern/kernel.img
 
 all: $(OBJDIR)/kern/kernel.img

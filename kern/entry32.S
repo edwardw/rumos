@@ -1,11 +1,8 @@
 #include <inc/mmu.h>
 
-    .p2align 4
-.text
 .global start32
     .code32
 start32:
-    #jmp     start32
     movl    %cr4, %eax
     orl     $(CR4_PAE_ON+CR4_PGE_ON), %eax
     movl    %eax, %cr4
@@ -40,7 +37,7 @@ start64:
     # parameters are passed in registers if available, not on stack, in the
     # sequence of:
     #       %rdi, %rsi, %rdx, %rcx, %r8 and %r9
-    movq    $129, %rdi      # argv0, stage2 kernel starts at sector 129, must match kern/Makefrag
+    movq    $65, %rdi       # argv0, stage2 kernel starts at sector 65, must match kern/Makefrag
     movq    $0x10000, %rsi  # argv1, the scratch space
     call    bootmain
     # Convert to the physical address
@@ -55,10 +52,9 @@ spin:
 __morestack:
     ret
 
-    .p2align PG4K_SHIFT
+    .p2align 4
 .data
 # Long mode bootstrap GDT
-.p2align 4
 gdt64:
     .quad 0x0000000000000000    # null entry
     .quad 0x0020980000000000    # code segment
@@ -68,21 +64,18 @@ gdt64_desc:
     .word gdt64_end - gdt64 - 1
     .long gdt64
 
+    .p2align PG4K_SHIFT
 # The bootstrap memory map, which maps
 #   [0, 4M) -> [0, 4M)
 #   [KERN_TEXT, KERN_TEXT+4M) -> [2M, 6M)
-.p2align PG4K_SHIFT
-.global entry_pml4
 entry_pml4:
     .quad   entry_pdp+PTE_W+PTE_P
     .space  PG4K_SIZE-16
     .quad   entry_pdp+PTE_W+PTE_P
-.global entry_pdp
 entry_pdp:
     .quad   entry_pd+PTE_W+PTE_P
     .space  PG4K_SIZE-16
     .quad   entry_pd+PTE_W+PTE_P
-.global entry_pd
 entry_pd:
     .quad   0x0+PTE_P+PTE_W+PDE_PS_ON
     .quad   0x200000+PTE_P+PTE_W+PDE_PS_ON
@@ -92,8 +85,6 @@ entry_pd:
     .space  34*8
 
 
-.globl      bootstack
 bootstack:
-    .space      PG4K_SIZE
-.globl      bootstacktop
+    .space  PG4K_SIZE
 bootstacktop:
