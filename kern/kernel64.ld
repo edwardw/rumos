@@ -25,7 +25,6 @@ SECTIONS
 		*(.data .data.* .got .got.*)
 	}
 
-	. = ALIGN(0x1000);
 	PROVIDE(edata = .);
 
 	.bss : {

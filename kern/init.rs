@@ -20,17 +20,8 @@ static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 
 #[no_mangle]
 pub extern "C" fn init() {
     use arch::drivers::vga;
-    use arch::cpu;
 
-    // Use linker provided symbols to zero the bss section, so the kernel is
-    // properly loaded.
-    extern {
-        static edata: u64;
-        static end: u64;
-    }
-    unsafe {
-        cpu::memset(edata as uint, 0, (end - edata) as uint);
-    }
+    init_bss();
 
     vga::init();
     vga::puts(SPLASH0, term::color::WHITE);
@@ -41,4 +32,24 @@ pub extern "C" fn init() {
     vga::puts(FORTUNE, term::color::BRIGHT_GREEN);
 
     loop {}
+}
+
+//
+// Use linker provided symbols to zero the bss section, so the kernel
+// is properly loaded.
+//
+fn init_bss() {
+    use arch::cpu;
+    extern {
+        static edata: u64;
+        static end: u64;
+    }
+
+    unsafe {
+        // The linker provided symbols are actually pointers.
+        // What matters is where they point to, not what.
+        let edata_ptr = mem::transmute::<*u64, uint>(&edata);
+        let end_ptr = mem::transmute::<*u64, uint>(&end);
+        cpu::memset(edata_ptr, 0, end_ptr - edata_ptr);
+    }
 }

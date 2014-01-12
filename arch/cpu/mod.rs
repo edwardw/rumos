@@ -21,9 +21,7 @@ pub unsafe fn memmove(dst: uint, src: uint, n: uint) {
 pub unsafe fn memset(va: uint, c: uint, n: uint) {
     asm!("cld; rep stosb"
         :
-        // XXX this is a hack
-        // don't know why need (n & 0xFFFF) for the function to work properly
-        : "{rDi}" (va), "{rax}" (c), "{rcx}" (n & 0xFFFF)
+        : "{rDi}" (va), "{rax}" (c), "{rcx}" (n)
         : "memory", "cc"
         : "volatile");
 }

@@ -52,8 +52,8 @@ spin:
 __morestack:
     ret
 
-    .p2align 4
 .data
+    .p2align 4
 # Long mode bootstrap GDT
 gdt64:
     .quad 0x0000000000000000    # null entry
