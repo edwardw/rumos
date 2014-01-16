@@ -3,8 +3,8 @@ OBJDIRS += kern
 KERN64_RSFILES = $(wildcard kern/*.rs)
 
 KERN64_DEPS := $(OBJDIR)/arch/$(RLIB_ARCH) \
-	$(OBJDIR)/rust-core/$(RLIB_CORE) \
-	$(OBJDIR)/rust-std/$(RLIB_STD)
+	$(OBJDIR)/rust-std/$(RLIB_STD) \
+	$(OBJDIR)/rust-extra/$(RLIB_EXTRA)
 
 $(OBJDIR)/kern/kernel32: kern/entry32.S kern/kernel32.ld boot/mbr_bootmain.rs
 	@mkdir -p $(@D)
@@ -14,7 +14,7 @@ $(OBJDIR)/kern/kernel32: kern/entry32.S kern/kernel32.ld boot/mbr_bootmain.rs
 
 $(OBJDIR)/kern/$(LIB_KERN64): $(KERN64_RSFILES) $(KERN64_DEPS)
 	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) --ar $(AR) --out-dir $(@D) kern/init.rs
+	$(RUSTC) $(RUSTFLAGS) --ar $(AR) -Z lto --out-dir $(@D) kern/init.rs
 
 $(OBJDIR)/kern/kernel64: kern/entry64.S kern/kernel64.ld $(OBJDIR)/kern/$(LIB_KERN64)
 	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/entry64.o kern/entry64.S

@@ -1,4 +1,4 @@
-use std::prelude::*;
+use extra::prelude::*;
 use cpu;
 use cpu::io;
 

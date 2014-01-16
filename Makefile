@@ -11,7 +11,7 @@ RUSTC := rustc
 CFLAGS := $(CFLAGS) -O1 -I$(TOP)
 
 RUSTFLAGS := -O --target x86_64-linux-gnu --save-temps
-RUSTFLAGS += -L $(OBJDIR)/arch -L $(OBJDIR)/rust-core -L $(OBJDIR)/rust-std
+RUSTFLAGS += -L $(OBJDIR)/arch -L $(OBJDIR)/rust-std -L $(OBJDIR)/rust-extra
 
 LDFLAGS :=
 
@@ -20,8 +20,8 @@ OBJDIRS :=
 
 # List of library names
 LIB_MORESTACK := libmorestack.a
-RLIB_CORE := libcore-2e829c2f-0.0.rlib
 RLIB_STD := libstd-64b22b00-0.0.rlib
+RLIB_EXTRA := libextra-a68a2dc1-0.0.rlib
 RLIB_ARCH := libarch-5a75d89e-0.0.rlib
 LIB_KERN64 := libkern64-cfc1451f-0.0.a
 
@@ -64,13 +64,13 @@ qemu-gdb: $(IMAGES) pre-qemu
 clean:
 	rm -rf $(OBJDIR)
 
-$(OBJDIR)/rust-core/$(RLIB_CORE): $(wildcard rust-core/core/*.rs)
+$(OBJDIR)/rust-std/$(RLIB_STD): $(wildcard rust-std/core/*.rs)
 	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-core/core/lib.rs
+	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-std/core/lib.rs
 
-$(OBJDIR)/rust-std/$(RLIB_STD): $(wildcard rust-std/*.rs)
+$(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(wildcard rust-extra/*.rs)
 	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-std/mod.rs
+	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-extra/mod.rs
 
 $(OBJDIR)/.deps:
 	@mkdir -p $(@D)

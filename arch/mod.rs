@@ -3,8 +3,8 @@
 #[no_std];
 #[feature(asm, globs)];
 
-extern mod core;
 extern mod std;
+extern mod extra;
 
 pub mod cpu;
 pub mod drivers;

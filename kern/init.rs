@@ -3,11 +3,11 @@
 #[no_std];
 #[feature(globs)];
 
-extern mod core;
 extern mod std;
+extern mod extra;
 extern mod arch;
 
-use std::prelude::*;
+use extra::prelude::*;
 
 static SPLASH0: &'static str = "    ____                  ____  _____\n";
 static SPLASH1: &'static str = "   / __ \\__  ______ ___  / __ \\/ ___/\n";

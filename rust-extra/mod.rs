@@ -1,9 +1,9 @@
-#[crate_id="std"];
+#[crate_id="extra"];
 #[crate_type="rlib"];
 #[no_std];
 #[feature(globs)];
 
-extern mod core;
+extern mod std;
 
 pub mod prelude;
 pub mod stdio;
