@@ -68,7 +68,7 @@ $(OBJDIR)/rust-std/$(RLIB_STD): $(wildcard rust-std/core/*.rs)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --cfg libc --out-dir $(@D) rust-std/core/lib.rs
 
-$(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(wildcard rust-extra/*.rs)
+$(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(OBJDIR)/rust-std/$(RLIB_STD) $(wildcard rust-extra/*.rs)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-extra/mod.rs
 

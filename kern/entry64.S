@@ -10,8 +10,9 @@ start64:
 relocated:
     # Set up the stack and call into rust
     movq    $bootstacktop, %rsp
-    movq    $0, %rbp
-    movq    $0, %fs:0x70
+    xorq    %rax, %rax
+    movq    %rax, %rbp
+    movq    %rax, %fs:0x70
     call    init
 
     # Spin if init returns (it shouldn't).

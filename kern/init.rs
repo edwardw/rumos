@@ -7,7 +7,12 @@ extern mod std;
 extern mod extra;
 extern mod arch;
 
-use extra::prelude::*;
+use std::cast;
+use std::int;
+use std::option::{Some, None};
+use std::iter::Iterator;
+use std::vec::ImmutableVector;
+use extra::term;
 
 static SPLASH0: &'static str = "    ____                  ____  _____\n";
 static SPLASH1: &'static str = "   / __ \\__  ______ ___  / __ \\/ ___/\n";
@@ -30,6 +35,7 @@ pub extern "C" fn init() {
     vga::puts(SPLASH3, term::color::WHITE);
     vga::puts(SPLASH4, term::color::WHITE);
     vga::puts(FORTUNE, term::color::BRIGHT_GREEN);
+    int::to_str_bytes(2014, 16, |buf| for c in buf.iter() { vga::putc(*c as char, term::color::WHITE); });
 
     loop {}
 }

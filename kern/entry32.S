@@ -17,6 +17,15 @@ start32:
     orl     $0x00000101, %eax
     wrmsr
 
+    # Now enable SSE instructions
+    movl    %cr0, %eax
+    andw    $0xFFFB, %ax    # clear coprocessor emulation CR0.EM
+    orw     $0x2, %ax       # set coprocessor monitoring  CR0.MP
+    movl    %eax, %cr0
+    movl    %cr4, %eax
+    orw     $0x600, %ax     # set CR4.OSFXSR and CR4.OSXMMEXCPT
+    movl    %eax, %cr4
+
     # Enable paging then long mode
     movl    %cr0, %eax
     orl     $CR0_PG_ON, %eax
