@@ -10,7 +10,7 @@ RUSTC := rustc
 
 CFLAGS := $(CFLAGS) -O1 -I$(TOP)
 
-RUSTFLAGS := -O --target x86_64-linux-gnu --save-temps
+RUSTFLAGS := -O --target x86_64-linux-gnu --save-temps -Z no-landing-pads
 RUSTFLAGS += -L $(OBJDIR)/arch -L $(OBJDIR)/rust-std -L $(OBJDIR)/rust-extra
 
 LDFLAGS :=
@@ -66,7 +66,7 @@ clean:
 
 $(OBJDIR)/rust-std/$(RLIB_STD): $(wildcard rust-std/core/*.rs)
 	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-std/core/lib.rs
+	$(RUSTC) $(RUSTFLAGS) --cfg libc --out-dir $(@D) rust-std/core/lib.rs
 
 $(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(wildcard rust-extra/*.rs)
 	@mkdir -p $(@D)

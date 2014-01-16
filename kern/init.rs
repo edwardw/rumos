@@ -48,8 +48,8 @@ fn init_bss() {
     unsafe {
         // The linker provided symbols are actually pointers.
         // What matters is where they point to, not what.
-        let edata_ptr = mem::transmute::<*u64, uint>(&edata);
-        let end_ptr = mem::transmute::<*u64, uint>(&end);
+        let edata_ptr = cast::transmute::<*u64, uint>(&edata);
+        let end_ptr = cast::transmute::<*u64, uint>(&end);
         cpu::memset(edata_ptr, 0, end_ptr - edata_ptr);
     }
 }

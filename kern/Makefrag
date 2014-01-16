@@ -10,7 +10,7 @@ $(OBJDIR)/kern/kernel32: kern/entry32.S kern/kernel32.ld boot/mbr_bootmain.rs
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/entry32.o kern/entry32.S
 	$(RUSTC) $(RUSTFLAGS) -c --out-dir $(@D) boot/mbr_bootmain.rs
-	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel32.ld -nostdlib $(OBJDIR)/kern/entry32.o $(OBJDIR)/kern/mbr_bootmain.o
+	$(LD) $(LDFLAGS) -flto -n -o $@ -T kern/kernel32.ld -nostdlib $(OBJDIR)/kern/entry32.o $(OBJDIR)/kern/mbr_bootmain.o
 
 $(OBJDIR)/kern/$(LIB_KERN64): $(KERN64_RSFILES) $(KERN64_DEPS)
 	@mkdir -p $(@D)
