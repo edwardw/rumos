@@ -73,14 +73,21 @@
 #define PROT_MODE_DSEG  0x10
 
 //
-// AMD64 Architecture Programmer's Manual V2 paragraph 5
+// AMD64 Architecture Programmer's Manual V2 3.1 System Control Registers
 //
-#define CR0_PG_ON       (1<<31)
-#define CR4_PAE_ON      (1<<5)
-#define CR4_PGE_ON      (1<<7)
-#define CR3_PML4_SHIFT      12
+#define CR0_MP_ON           (1<<1)
+#define CR0_EM_OFF          (~(1<<2))
+#define CR0_PG_ON           (1<<31)
+#define CR4_PAE_ON          (1<<5)
+#define CR4_PGE_ON          (1<<7)
+#define CR4_OSFXSR_ON       (1<<9)
+#define CR4_OSXMMEXCPT_ON   (1<<10)
 #define CR3_PML4_PWT        (1<<3)  // Write through
 #define CR3_PML4_PCD        (1<<4)  // Cache disable
+#define CR3_PML4_SHIFT      12
+#define MSR_EFER            0xC0000080  // Extended Feature Enable Register
+#define EFER_SCE_ON         0x1         // System Call Extensions
+#define EFER_LME_ON         (1<<8)      // Long Mode Enable
 
 #define PML4E_SHIFT     39
 #define PDPE_SHIFT      30

@@ -11,19 +11,19 @@ start32:
     movl    $entry_pml4, %eax
     movl    %eax, %cr3
 
-    # Enable long mode and SYSCALL/SYSRET
-    movl    $0xC0000080, %ecx
+    # Configure Extended Feature Enable MSR
+    movl    $(MSR_EFER), %ecx
     rdmsr
-    orl     $0x00000101, %eax
+    orl     $(EFER_LME_ON+EFER_SCE_ON), %eax    # set long mode and system call extensions
     wrmsr
 
     # Now enable SSE instructions
     movl    %cr0, %eax
-    andw    $0xFFFB, %ax    # clear coprocessor emulation CR0.EM
-    orw     $0x2, %ax       # set coprocessor monitoring  CR0.MP
+    andl    $(CR0_EM_OFF), %eax # clear coprocessor emulation CR0.EM
+    orl     $(CR0_MP_ON), %eax  # set coprocessor monitoring  CR0.MP
     movl    %eax, %cr0
     movl    %cr4, %eax
-    orw     $0x600, %ax     # set CR4.OSFXSR and CR4.OSXMMEXCPT
+    orl     $(CR4_OSFXSR_ON+CR4_OSXMMEXCPT_ON), %eax # set CR4.OSFXSR and CR4.OSXMMEXCPT
     movl    %eax, %cr4
 
     # Enable paging then long mode
