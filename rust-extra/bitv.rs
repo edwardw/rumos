@@ -18,7 +18,7 @@ use std::uint;
 use std::fail;
 
 #[deriving(Clone)]
-struct SmallBitv {
+pub struct SmallBitv {
     /// only the lowest nbits of this value are used. the rest is undefined.
     bits: uint
 }

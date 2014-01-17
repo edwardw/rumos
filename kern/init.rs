@@ -26,6 +26,7 @@ static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 
 #[no_mangle]
 pub extern "C" fn init() {
     use arch::drivers::vga;
+    use arch::drivers::keyboard;
 
     init_bss();
 
@@ -43,6 +44,11 @@ pub extern "C" fn init() {
         vga::puts(" 0b", term::color::WHITE);
         int::to_str_bytes(*i, 8, |buf| vga::puts(str::from_utf8(buf), term::color::WHITE));
     }
+
+    keyboard::init();
+    vga::puts("\n\nI'm waiting: ", term::color::WHITE);
+    vga::putc(keyboard::getchar() as char, term::color::BRIGHT_GREEN);
+    vga::puts("\n", term::color::WHITE);
 
     loop {}
 }

@@ -8,3 +8,4 @@ extern mod std;
 pub mod prelude;
 pub mod stdio;
 pub mod term;
+pub mod bitv;
