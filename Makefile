@@ -64,7 +64,8 @@ qemu-gdb: $(IMAGES) pre-qemu
 clean:
 	rm -rf $(OBJDIR)
 
-$(OBJDIR)/rust-std/$(RLIB_STD): $(wildcard rust-std/core/*.rs)
+STD_SRCS := $(wildcard rust-std/core/*.rs) $(wildcard rust-std/core/rt/*.rs)
+$(OBJDIR)/rust-std/$(RLIB_STD): $(STD_SRCS)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --cfg libc --out-dir $(@D) rust-std/core/lib.rs
 

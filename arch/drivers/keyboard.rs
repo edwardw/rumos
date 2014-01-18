@@ -142,16 +142,16 @@ static qwerty_ctl: &'static str = "
 \x00\x00\x00\x00\x00\x00\x00\x00\
 ";
 
-static RING_BUF: uint = 512;
+static RING_BUF_SIZE: uint = 512;
 struct ring_buf {
-    buf: [u8, ..RING_BUF],
+    buf: [u8, ..RING_BUF_SIZE],
     rpos: uint,
     wpos: uint,
 }
 
 // The circular keyboard input buffer
 static mut kbd_buf: ring_buf = ring_buf {
-    buf: [0u8, ..RING_BUF],
+    buf: [0u8, ..RING_BUF_SIZE],
     rpos: 0,
     wpos: 0,
 };
@@ -176,7 +176,7 @@ pub fn getc() -> u8 {
 
         if kbd_buf.rpos != kbd_buf.wpos {
             let c = kbd_buf.buf[kbd_buf.rpos];
-            kbd_buf.rpos = (kbd_buf.rpos + 1) % RING_BUF;
+            kbd_buf.rpos = (kbd_buf.rpos + 1) % RING_BUF_SIZE;
             c
         } else {
             0
@@ -189,7 +189,7 @@ pub unsafe fn kbd_intr() {
         match keypress() {
             Some(c) => if c != 0 {
                 kbd_buf.buf[kbd_buf.wpos] = c;
-                kbd_buf.wpos = (kbd_buf.wpos + 1) % RING_BUF;
+                kbd_buf.wpos = (kbd_buf.wpos + 1) % RING_BUF_SIZE;
             },
             None    => return,
         }

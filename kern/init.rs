@@ -38,15 +38,13 @@ pub extern "C" fn init() {
     vga::puts(SPLASH4, term::color::WHITE);
     vga::puts(FORTUNE, term::color::BRIGHT_GREEN);
     int::to_str_bytes(2014, 10, |buf| vga::puts(str::from_utf8(buf), term::color::WHITE));
-    let xs = [1024, 512, 256, 128, 64, 16, 8, 4, 2];
-    // for i in [1024, 512, 256, 128, 64, 16, 8, 4, 2].iter() { // doesn't compile!
-    for i in xs.iter() {
+    for i in [1024, 512, 256, 128, 64, 16, 8, 4, 2].iter() {
         vga::puts(" 0b", term::color::WHITE);
         int::to_str_bytes(*i, 8, |buf| vga::puts(str::from_utf8(buf), term::color::WHITE));
     }
 
     keyboard::init();
-    vga::puts("\n\nI'm waiting: ", term::color::WHITE);
+    vga::puts("\n\nSay something: ", term::color::WHITE);
     vga::putc(keyboard::getchar() as char, term::color::BRIGHT_GREEN);
     vga::puts("\n", term::color::WHITE);
 
