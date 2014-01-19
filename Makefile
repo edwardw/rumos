@@ -25,6 +25,11 @@ RLIB_EXTRA := libextra-a68a2dc1-0.0.rlib
 RLIB_ARCH := libarch-5a75d89e-0.0.rlib
 LIB_KERN64 := libkern64-cfc1451f-0.0.a
 
+# Recursive wildcard function
+# http://blog.jgc.org/2011/07/gnu-make-recursive-wildcard-function.html
+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
+  $(filter $(subst *,%,$2),$d))
+
 # All must be the first target
 all:
 
@@ -64,12 +69,12 @@ qemu-gdb: $(IMAGES) pre-qemu
 clean:
 	rm -rf $(OBJDIR)
 
-STD_SRCS := $(wildcard rust-std/core/*.rs) $(wildcard rust-std/core/rt/*.rs)
+STD_SRCS := $(call rwildcard,rust-std/core/,*.rs)
 $(OBJDIR)/rust-std/$(RLIB_STD): $(STD_SRCS)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --cfg libc --out-dir $(@D) rust-std/core/lib.rs
 
-$(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(OBJDIR)/rust-std/$(RLIB_STD) $(wildcard rust-extra/*.rs)
+$(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(OBJDIR)/rust-std/$(RLIB_STD) $(call rwildcard,rust-extra/,*.rs)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-extra/mod.rs
 

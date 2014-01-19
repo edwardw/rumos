@@ -1,6 +1,6 @@
 OBJDIRS += kern
 
-KERN64_RSFILES = $(wildcard kern/*.rs)
+KERN64_RSFILES = $(call rwildcard,kern/,*.rs)
 
 KERN64_DEPS := $(OBJDIR)/arch/$(RLIB_ARCH) \
 	$(OBJDIR)/rust-std/$(RLIB_STD) \

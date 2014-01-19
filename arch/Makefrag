@@ -1,8 +1,6 @@
 OBJDIRS += arch
 
-ARCH_SRCFILES := $(wildcard arch/*.rs) \
-	$(wildcard arch/cpu/*.rs) \
-	$(wildcard arch/drivers/*.rs)
+ARCH_SRCFILES := $(call rwildcard,arch/,*.rs)
 ARCH_DEPS := $(OBJDIR)/arch/$(LIB_MORESTACK) \
 	$(OBJDIR)/rust-std/$(RLIB_STD) \
 	$(OBJDIR)/rust-extra/$(RLIB_EXTRA)
