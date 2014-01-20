@@ -9,17 +9,19 @@ extern mod arch;
 
 use std::cast;
 use std::int;
-use std::str;
 use std::option::{Some, None};
 use std::iter::Iterator;
 use std::vec::ImmutableVector;
+use std::io;
 use extra::term;
 
-static SPLASH0: &'static str = "    ____                  ____  _____\n";
-static SPLASH1: &'static str = "   / __ \\__  ______ ___  / __ \\/ ___/\n";
-static SPLASH2: &'static str = "  / /_/ / / / / __ `__ \\/ / / /\\__ \\\n";
-static SPLASH3: &'static str = " / _, _/ /_/ / / / / / / /_/ /___/ /\n";
-static SPLASH4: &'static str = "/_/ |_|\\__,_/_/ /_/ /_/\\____//____/\n";
+pub mod util;
+
+static SPLASH0: &'static str = r"    ____                  ____  _____";
+static SPLASH1: &'static str = r"   / __ \__  ______ ___  / __ \/ ___/";
+static SPLASH2: &'static str = r"  / /_/ / / / / __ `__ \/ / / /\__ \";
+static SPLASH3: &'static str = r" / _, _/ /_/ / / / / / / /_/ /___/ /";
+static SPLASH4: &'static str = r"/_/ |_|\__,_/_/ /_/ /_/\____//____/";
 
 static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 4 + 2!\n";
 
@@ -27,26 +29,35 @@ static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 
 pub extern "C" fn init() {
     use arch::drivers::vga;
     use arch::drivers::keyboard;
+    use arch::cpu;
+    use util::kConsole;
+
+    let kconsole: &mut io::Writer = unsafe { cast::transmute(&kConsole as &io::Writer) };
 
     init_bss();
 
     vga::init();
-    vga::puts(SPLASH0, term::color::WHITE);
-    vga::puts(SPLASH1, term::color::WHITE);
-    vga::puts(SPLASH2, term::color::WHITE);
-    vga::puts(SPLASH3, term::color::WHITE);
-    vga::puts(SPLASH4, term::color::WHITE);
+    kconsole.write_line(SPLASH0);
+    kconsole.write_line(SPLASH1);
+    kconsole.write_line(SPLASH2);
+    kconsole.write_line(SPLASH3);
+    kconsole.write_line(SPLASH4);
     vga::puts(FORTUNE, term::color::BRIGHT_GREEN);
-    int::to_str_bytes(2014, 10, |buf| vga::puts(str::from_utf8(buf), term::color::WHITE));
+    kconsole.write_int(2014);
     for i in [1024, 512, 256, 128, 64, 16, 8, 4, 2].iter() {
         vga::puts(" 0b", term::color::WHITE);
-        int::to_str_bytes(*i, 8, |buf| vga::puts(str::from_utf8(buf), term::color::WHITE));
+        int::to_str_bytes(*i, 8, |buf| kconsole.write(buf));
     }
 
     keyboard::init();
-    vga::puts("\n\nSay something: ", term::color::WHITE);
-    vga::putc(keyboard::getchar() as char, term::color::BRIGHT_GREEN);
-    vga::puts("\n", term::color::WHITE);
+
+    let (basemem, extmem, extmem_16mplus) = cpu::detect_memory();
+    kconsole.write_str("\n\nBase memory (K): ");
+    kconsole.write_uint(basemem / 1024);
+    kconsole.write_str("\nExtended memory (K): ");
+    kconsole.write_uint(extmem / 1024);
+    kconsole.write_str("\nExtended memory >16M (K): ");
+    kconsole.write_uint(extmem_16mplus / 1024);
 
     loop {}
 }
