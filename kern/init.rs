@@ -12,7 +12,6 @@ use std::int;
 use std::option::{Some, None};
 use std::iter::Iterator;
 use std::vec::ImmutableVector;
-use std::io;
 use extra::term;
 
 pub mod util;
@@ -30,9 +29,8 @@ pub extern "C" fn init() {
     use arch::drivers::vga;
     use arch::drivers::keyboard;
     use arch::cpu;
-    use util::kConsole;
 
-    let kconsole: &mut io::Writer = unsafe { cast::transmute(&kConsole as &io::Writer) };
+    let kconsole = util::get_kconsole();
 
     init_bss();
 
@@ -45,7 +43,7 @@ pub extern "C" fn init() {
     vga::puts(FORTUNE, term::color::BRIGHT_GREEN);
     kconsole.write_int(2014);
     for i in [1024, 512, 256, 128, 64, 16, 8, 4, 2].iter() {
-        vga::puts(" 0b", term::color::WHITE);
+        kconsole.write_str(" 0b");
         int::to_str_bytes(*i, 8, |buf| kconsole.write(buf));
     }
 
