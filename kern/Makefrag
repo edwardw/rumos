@@ -20,7 +20,7 @@ $(OBJDIR)/kern/kernel64: kern/entry64.S kern/kernel64.ld $(OBJDIR)/kern/$(LIB_KE
 	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/entry64.o kern/entry64.S
 	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel64.ld -nostdlib $(OBJDIR)/kern/entry64.o $(OBJDIR)/kern/$(LIB_KERN64)
 
-$(OBJDIR)/kern/kernel.img: $(OBJDIR)/boot/boot $(OBJDIR)/kern/kernel32 $(OBJDIR)/kern/kernel64
+$(OBJDIR)/kern/kernel.img: $(OBJDIR)/grub/.deps $(OBJDIR)/boot/boot $(OBJDIR)/kern/kernel32 $(OBJDIR)/kern/kernel64
 	dd if=/dev/zero of=$(OBJDIR)/kern/kernel.img~ count=10000 2>/dev/null
 	dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/kern/kernel.img~ conv=notrunc 2>/dev/null
 	dd if=$(OBJDIR)/kern/kernel32 of=$(OBJDIR)/kern/kernel.img~ seek=1 conv=notrunc 2>/dev/null
