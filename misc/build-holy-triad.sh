@@ -4,8 +4,6 @@
 # They can be installed by homebrew.
 export CC=gcc-4.8
 export CXX=g++-4.8
-# Building gcc needs some header files from NetBSD
-#NETBSD_SRC_DIR=$(pwd)/netbsd_src
 
 # Gdb doesn't support more generic target x86_64-pc-elf,
 # although other two do. More importantly, NetBSD buildrump.sh
@@ -41,15 +39,6 @@ die ()
   exit 1
 }
 
-#if [ ! -d ${NETBSD_SRC_DIR} ]; then
-#  mkdir ${NETBSD_SRC_DIR}
-#  cd ${NETBSD_SRC_DIR}
-#  CVSROOT="anoncvs@anoncvs.NetBSD.org:/cvsroot" CVS_RSH="ssh" \
-#      cvs checkout -r netbsd-6 -P src/sys || die checkout NetBSD src failed
-#  ln -s src/sys/arch/amd64/include machine
-#  cd ..
-#fi
-
 for tarball in binutils*.bz2 gcc*.bz2 gdb*.bz2; do
   case ${tarball} in
     binutils-*.tar.bz2)
@@ -65,8 +54,26 @@ for tarball in binutils*.bz2 gcc*.bz2 gdb*.bz2; do
       untar_then_cd ${tarball} ${DIR_BUILD_GCC}
       ../${tarball%.tar.bz2}/configure --target=${TARGET} --prefix=${PREFIX} \
           --disable-nls --enable-languages=c,c++ --without-headers
-      make || die make gcc
-      make install || die make gcc
+      make all-gcc || die make all-gcc
+      # Get ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-6.0/images/NetBSD-6.0-amd64.iso
+      # mount it and:
+      #   mkdir -p netbsd
+      #   tar xzf NETBSD_60/AMD64/BINARY/SETS/COMP.TGZ -C netbsd
+      #   cp -R netbsd/usr/include/amd64 gcc/include/machine
+      #   cp -R netbsd/usr/include/sys gcc/include
+      #   cp netbsd/usr/include/unistd.h gcc/include/
+      #   cp netbsd/usr/include/pthread_types.h gcc/include/
+      #   cp netbsd/usr/include/stdlib.h gcc/include/
+      #   cp netbsd/usr/lib/crtbeginS.o gcc/
+      #   cp netbsd/usr/lib/crtendS.o gcc/
+      #   tar xzf NETBSD_60/AMD64/BINARY/SETS/BASE.TGZ -C netbsd
+      #   cp netbsd/lib/libc.so.12.181 gcc/libc.so
+      # This is the ugliest hack ever.
+      make all-target-libgcc || die make all-target-libgcc
+      make install-gcc || die make install-gcc
+      make install-target-libgcc || die make install-target-libgcc
+      # GRUB always needs i386 version of the header files, so:
+      #   cp -R netbsd/usr/include/i386 ${PREFIX}/lib/gcc/${TARGET}/4.8.2/include
       cd ..
       ;;
 

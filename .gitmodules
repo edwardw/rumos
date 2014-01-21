@@ -2,3 +2,6 @@
 	path = rust-std
   branch = std
 	url = https://github.com/edwardw/rust-core
+[submodule "grub"]
+	path = grub
+	url = git://git.savannah.gnu.org/grub.git
