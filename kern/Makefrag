@@ -6,25 +6,20 @@ KERN64_DEPS := $(OBJDIR)/arch/$(RLIB_ARCH) \
 	$(OBJDIR)/rust-std/$(RLIB_STD) \
 	$(OBJDIR)/rust-extra/$(RLIB_EXTRA)
 
-$(OBJDIR)/kern/kernel32: kern/entry32.S kern/kernel32.ld boot/mbr_bootmain.rs
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/entry32.o kern/entry32.S
-	$(RUSTC) $(RUSTFLAGS) -c --out-dir $(@D) boot/mbr_bootmain.rs
-	$(LD) $(LDFLAGS) -flto -n -o $@ -T kern/kernel32.ld -nostdlib $(OBJDIR)/kern/entry32.o $(OBJDIR)/kern/mbr_bootmain.o
-
 $(OBJDIR)/kern/$(LIB_KERN64): $(KERN64_RSFILES) $(KERN64_DEPS)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --ar $(AR) -Z lto --out-dir $(@D) kern/init.rs
 
-$(OBJDIR)/kern/kernel64: kern/entry64.S kern/kernel64.ld $(OBJDIR)/kern/$(LIB_KERN64)
+$(OBJDIR)/kern/kernel.bin: kern/boot_grub.S kern/entry64.S kern/kernel.ld $(OBJDIR)/kern/$(LIB_KERN64)
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/boot_grub.o kern/boot_grub.S
 	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/entry64.o kern/entry64.S
-	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel64.ld -nostdlib $(OBJDIR)/kern/entry64.o $(OBJDIR)/kern/$(LIB_KERN64)
+	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel.ld -nostdlib $(OBJDIR)/kern/boot_grub.o $(OBJDIR)/kern/entry64.o $(OBJDIR)/kern/$(LIB_KERN64)
 
-$(OBJDIR)/kern/kernel.img: $(OBJDIR)/grub/.deps $(OBJDIR)/boot/boot $(OBJDIR)/kern/kernel32 $(OBJDIR)/kern/kernel64
-	dd if=/dev/zero of=$(OBJDIR)/kern/kernel.img~ count=10000 2>/dev/null
-	dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/kern/kernel.img~ conv=notrunc 2>/dev/null
-	dd if=$(OBJDIR)/kern/kernel32 of=$(OBJDIR)/kern/kernel.img~ seek=1 conv=notrunc 2>/dev/null
-	dd if=$(OBJDIR)/kern/kernel64 of=$(OBJDIR)/kern/kernel.img~ seek=65 conv=notrunc 2>/dev/null
-	mv $(OBJDIR)/kern/kernel.img~ $(OBJDIR)/kern/kernel.img
+$(ISO): $(OBJDIR)/grub/.deps kern/grub.cfg $(OBJDIR)/kern/kernel.bin
+	@mkdir -p $(@D)/iso/boot/grub
+	@cp $(OBJDIR)/kern/kernel.bin $(@D)/iso/boot
+	@cp kern/grub.cfg $(@D)/iso/boot/grub/
+	$(GRUB_INSTALL)/bin/grub-mkrescue -o $(ISO) $(@D)/iso
 
-all: $(OBJDIR)/kern/kernel.img
+all: $(ISO)

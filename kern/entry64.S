@@ -20,7 +20,6 @@ spin:
     jmp     spin
 
 .data
-
     .p2align PG4K_SHIFT
 bootstack:
     .space      PG4K_SIZE

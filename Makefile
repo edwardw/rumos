@@ -39,28 +39,28 @@ all:
 # Delete target files if there is an error (or make is interrupted)
 .DELETE_ON_ERROR:
 
-include boot/Makefrag
-include kern/Makefrag
-include arch/Makefrag
-
 # try to generate a unique GDB port
 GDBPORT	:= $(shell expr `id -u` % 5000 + 25000)
 
 QEMU ?= qemu-system-x86_64
-QEMUOPTS := -hda $(OBJDIR)/kern/kernel.img -serial mon:stdio -gdb tcp::$(GDBPORT)
+QEMUOPTS := -cdrom $(OBJDIR)/kern/rumos.iso -serial mon:stdio -gdb tcp::$(GDBPORT)
 CPUS ?= 1
 QEMUOPTS += -m 512 -smp $(CPUS)
-IMAGES := $(OBJDIR)/kern/kernel.img
+ISO := $(OBJDIR)/kern/rumos.iso
+
+include boot/Makefrag
+include kern/Makefrag
+include arch/Makefrag
 
 .gdbinit: .gdbinit.tmpl
 	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
 
 pre-qemu: .gdbinit
 
-qemu: $(IMAGES) pre-qemu
+qemu: $(ISO) pre-qemu
 	$(QEMU) $(QEMUOPTS)
 
-qemu-gdb: $(IMAGES) pre-qemu
+qemu-gdb: $(ISO) pre-qemu
 	@echo "***"
 	@echo "*** Now run 'gdb'." 1>&2
 	@echo "***"

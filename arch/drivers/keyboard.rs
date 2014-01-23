@@ -199,7 +199,7 @@ pub unsafe fn kbd_intr() {
 static mut key_modifier: SmallBitv = SmallBitv { bits: 0 };
 
 unsafe fn keypress() -> Option<u8> {
-    if (io::inb(KBSTATP as u16) & KBS_DIB == 0) {
+    if io::inb(KBSTATP as u16) & KBS_DIB == 0 {
         return None;
     }
 
@@ -223,9 +223,9 @@ unsafe fn keypress() -> Option<u8> {
                 key_modifier.set(MOD_ESC, false);
             }
 
-            key_modifier.set(shift_code(data) as uint, true);
-            key_modifier.set(toggle_code(data) as uint,
-                !key_modifier.get(toggle_code(data) as uint));
+            key_modifier.set(shift_code(data), true);
+            key_modifier.set(toggle_code(data),
+                !key_modifier.get(toggle_code(data)));
 
             data = if key_modifier.get(MOD_CTL) {
                 qwerty_ctl[data]
