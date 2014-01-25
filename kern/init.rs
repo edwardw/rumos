@@ -8,11 +8,13 @@ extern mod extra;
 extern mod arch;
 
 use std::cast;
-use std::int;
+use std::{int, uint};
 use std::option::{Some, None};
 use std::iter::Iterator;
 use std::vec::ImmutableVector;
+use std::ptr::RawPtr;
 use extra::term;
+use arch::drivers::vga;
 
 pub mod util;
 
@@ -29,7 +31,7 @@ struct MultibootInfo {
     cmbline             : u32,
     mods_count          : u32,
     mods_addr           : u32,
-    syms                : [u8, ..12],
+    syms                : [u8, ..16],
     mmap_length         : u32,
     mmap_addr           : u32,
     drives_length       : u32,
@@ -38,6 +40,14 @@ struct MultibootInfo {
     boot_loader_name    : u32,
     apm_table           : u32,
     // don't care the rest so omitted
+}
+
+#[packed]
+struct GrubMemMap {
+    mmap_size   : u32,
+    mmap_addr   : u64,
+    mmap_length : u64,
+    mmap_type   : u32,
 }
 
 static SPLASH0: &'static str = r"    ____                  ____  _____";
@@ -50,9 +60,7 @@ static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 
 
 #[no_mangle]
 pub extern "C" fn init(mb_info: *MultibootInfo) {
-    use arch::drivers::vga;
     use arch::drivers::keyboard;
-    use arch::cpu;
 
     let kconsole = util::get_kconsole();
 
@@ -70,16 +78,11 @@ pub extern "C" fn init(mb_info: *MultibootInfo) {
         kconsole.write_str(" 0b");
         int::to_str_bytes(*i, 8, |buf| kconsole.write(buf));
     }
+    kconsole.write_line("");
+
+    init_mmap(mb_info);
 
     keyboard::init();
-
-    let (basemem, extmem, extmem_16mplus) = cpu::detect_memory();
-    kconsole.write_str("\n\nBase memory (K): ");
-    kconsole.write_uint(basemem / 1024);
-    kconsole.write_str("\nExtended memory (K): ");
-    kconsole.write_uint(extmem / 1024);
-    kconsole.write_str("\nExtended memory >16M (K): ");
-    kconsole.write_uint(extmem_16mplus / 1024);
 
     loop {}
 }
@@ -101,5 +104,36 @@ fn init_bss() {
         let edata_ptr = cast::transmute::<*u64, uint>(&edata);
         let end_ptr = cast::transmute::<*u64, uint>(&end);
         cpu::memset(edata_ptr, 0, end_ptr - edata_ptr);
+    }
+}
+
+//
+// Interpret the grub mmap and initialize vmem.
+//
+fn init_mmap(mb_info: *MultibootInfo) {
+    unsafe {
+        if (*mb_info).flags & (1<<6) != 0 {
+            // the mmap info exists
+            let kconsole = util::get_kconsole();
+            kconsole.write_line("Memory maps:");
+
+            let mut mmap_len = (*mb_info).mmap_length;
+            let mut mmap = (*mb_info).mmap_addr as *GrubMemMap;
+            while mmap_len as i32 > 0 {
+                let mem_start = (*mmap).mmap_addr;
+                let mem_end = (*mmap).mmap_addr + (*mmap).mmap_length;
+                let mem_type = (*mmap).mmap_type;
+
+                mmap_len -= (*mmap).mmap_size;
+                kconsole.write_str("    ");
+                uint::to_str_bytes(mem_start as uint, 16, |buf| kconsole.write(buf));
+                kconsole.write_str(" -> ");
+                uint::to_str_bytes(mem_end as uint, 16, |buf| kconsole.write(buf));
+                kconsole.write_str(", type ");
+                kconsole.write_uint(mem_type as uint);
+                kconsole.write_line("");
+                mmap = mmap.offset(1);
+            }
+        }
     }
 }
