@@ -16,6 +16,30 @@ use extra::term;
 
 pub mod util;
 
+//
+// GNU grub2 multiboot info structure
+// http://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Boot-information-format
+//
+#[packed]
+struct MultibootInfo {
+    flags               : u32,
+    mem_lower           : u32,
+    mem_high            : u32,
+    boot_device         : u32,
+    cmbline             : u32,
+    mods_count          : u32,
+    mods_addr           : u32,
+    syms                : [u8, ..12],
+    mmap_length         : u32,
+    mmap_addr           : u32,
+    drives_length       : u32,
+    drives_addr         : u32,
+    config_table        : u32,
+    boot_loader_name    : u32,
+    apm_table           : u32,
+    // don't care the rest so omitted
+}
+
 static SPLASH0: &'static str = r"    ____                  ____  _____";
 static SPLASH1: &'static str = r"   / __ \__  ______ ___  / __ \/ ___/";
 static SPLASH2: &'static str = r"  / /_/ / / / / __ `__ \/ / / /\__ \";
@@ -25,7 +49,7 @@ static SPLASH4: &'static str = r"/_/ |_|\__,_/_/ /_/ /_/\____//____/";
 static FORTUNE: &'static str = "\n2014 = 1024 + 512 + 256 + 128 + 64 + 16 + 8 + 4 + 2!\n";
 
 #[no_mangle]
-pub extern "C" fn init() {
+pub extern "C" fn init(mb_info: *MultibootInfo) {
     use arch::drivers::vga;
     use arch::drivers::keyboard;
     use arch::cpu;

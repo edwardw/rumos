@@ -10,14 +10,14 @@ $(OBJDIR)/kern/$(LIB_KERN64): $(KERN64_RSFILES) $(KERN64_DEPS)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --ar $(AR) -Z lto --out-dir $(@D) kern/init.rs
 
-$(OBJDIR)/kern/kernel.bin: kern/boot_grub.S kern/entry64.S kern/kernel.ld $(OBJDIR)/kern/$(LIB_KERN64)
+$(OBJDIR)/kern/kernel.bin: kern/boot_grub.S kern/kernel.ld $(OBJDIR)/kern/$(LIB_KERN64)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/boot_grub.o kern/boot_grub.S
-	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/entry64.o kern/entry64.S
-	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel.ld -nostdlib $(OBJDIR)/kern/boot_grub.o $(OBJDIR)/kern/entry64.o $(OBJDIR)/kern/$(LIB_KERN64)
+	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel.ld -nostdlib $(OBJDIR)/kern/boot_grub.o $(OBJDIR)/kern/$(LIB_KERN64)
 
 $(ISO): $(OBJDIR)/grub/.deps kern/grub.cfg $(OBJDIR)/kern/kernel.bin
 	@mkdir -p $(@D)/iso/boot/grub
+	python kern/mbh_patch.py $(OBJDIR)/kern/kernel.bin
 	@cp $(OBJDIR)/kern/kernel.bin $(@D)/iso/boot
 	@cp kern/grub.cfg $(@D)/iso/boot/grub/
 	$(GRUB_INSTALL)/bin/grub-mkrescue -o $(ISO) $(@D)/iso

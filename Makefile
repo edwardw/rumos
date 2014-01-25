@@ -66,6 +66,19 @@ qemu-gdb: $(ISO) pre-qemu
 	@echo "***"
 	$(QEMU) $(QEMUOPTS) -S
 
+VBOX_DISK := $(OBJDIR)/kern/disk.vdi
+vbox: $(ISO)
+	@if [[ -f $(VBOX_DISK) ]]; then \
+		VBoxManage unregistervm rumos --delete; \
+		rm -f $(VBOX_DISK); \
+	fi
+	@VBoxManage convertfromraw $(ISO) $(VBOX_DISK)
+	@VBoxManage createvm --name rumos --register
+	@VBoxManage modifyvm rumos --acpi on --ioapic on --cpus 2 --memory 512 --boot1 disk --boot2 none
+	@VBoxManage storagectl rumos --name "SATA Controller" --add sata
+	@VBoxManage storageattach rumos --storagectl "SATA Controller" --port 0 --type hdd --medium $(VBOX_DISK)
+	VBoxManage startvm rumos
+
 clean:
 	rm -rf $(OBJDIR)/rust-extra
 	rm -rf $(OBJDIR)/boot
