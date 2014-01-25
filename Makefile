@@ -1,5 +1,5 @@
 OBJDIR := obj
-TOP := .
+TOP := $(PWD)
 
 TARGET := x86_64-pc-netbsd
 CC := $(TARGET)-gcc
@@ -48,9 +48,8 @@ CPUS ?= 1
 QEMUOPTS += -m 512 -smp $(CPUS)
 ISO := $(OBJDIR)/kern/rumos.iso
 
-include boot/Makefrag
-include kern/Makefrag
 include arch/Makefrag
+include kern/Makefrag
 
 .gdbinit: .gdbinit.tmpl
 	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
@@ -93,33 +92,6 @@ $(OBJDIR)/rust-std/$(RLIB_STD): $(STD_SRCS)
 $(OBJDIR)/rust-extra/$(RLIB_EXTRA): $(OBJDIR)/rust-std/$(RLIB_STD) $(call rwildcard,rust-extra/,*.rs)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --out-dir $(@D) rust-extra/mod.rs
-
-GRUB_DEPS := $(call rwildcard,grub/grub-core/,*.c *.h)
-GRUB_INSTALL := `pwd`/$(OBJDIR)/grub/install
-# Native gcc
-NGCC := /usr/local/Cellar/gcc48/4.8.2/bin/gcc-4.8
-# The default flex on OSX is outdated for grub
-LEX := /usr/local/Cellar/flex/2.5.37/bin/flex
-$(OBJDIR)/grub/.deps: $(GRUB_DEPS)
-	@mkdir -p $(@D)
-	touch $@
-	(cd $(TOP)/grub && ./autogen.sh)
-	(cd $(@D) && \
-		../../grub/configure \
-		BUILD_CC=$(NGCC) \
-		--host=amd64-osx-darwin \
-		CC=$(NGCC) \
-		--target=x86_64 \
-		TARGET_CC=$(TARGET)-gcc \
-		TARGET_OBJCOPY=$(TARGET)-objcopy \
-		TARGET_STRIP=$(TARGET)-strip \
-		TARGET_NM=$(TARGET)-nm \
-		TARGET_RANLIB=$(TARGET)-ranlib \
-		LEX=$(LEX) \
-		--prefix=$(GRUB_INSTALL) \
-		--disable-werror && make && make install)
-
--include $(OBJDIR)/grub/.deps
 
 $(OBJDIR)/.deps:
 	@mkdir -p $(@D)

@@ -6,6 +6,17 @@ KERN64_DEPS := $(OBJDIR)/arch/$(RLIB_ARCH) \
 	$(OBJDIR)/rust-std/$(RLIB_STD) \
 	$(OBJDIR)/rust-extra/$(RLIB_EXTRA)
 
+GRUB_INSTALL := $(TOP)/$(OBJDIR)/grub/install
+# The following dependency
+#	GRUB_DEPS := $(call rwildcard,grub/grub-core/,*.c *.h)
+# causes infinite recompilation of grub. The grub seems to update its own
+# source directory when being built.
+GRUB_DEPS := $(TOP)/.gitmodules
+# Native gcc
+NGCC := /usr/local/Cellar/gcc48/4.8.2/bin/gcc-4.8
+# The default flex on OSX is outdated for grub
+LEX := /usr/local/Cellar/flex/2.5.37/bin/flex
+
 $(OBJDIR)/kern/$(LIB_KERN64): $(KERN64_RSFILES) $(KERN64_DEPS)
 	@mkdir -p $(@D)
 	$(RUSTC) $(RUSTFLAGS) --ar $(AR) -Z lto --out-dir $(@D) kern/init.rs
@@ -15,11 +26,31 @@ $(OBJDIR)/kern/kernel.bin: kern/boot_grub.S kern/kernel.ld $(OBJDIR)/kern/$(LIB_
 	$(CC) $(CFLAGS) -nostdinc -c -o $(OBJDIR)/kern/boot_grub.o kern/boot_grub.S
 	$(LD) $(LDFLAGS) -n -o $@ -T kern/kernel.ld -nostdlib $(OBJDIR)/kern/boot_grub.o $(OBJDIR)/kern/$(LIB_KERN64)
 
-$(ISO): $(OBJDIR)/grub/.deps kern/grub.cfg $(OBJDIR)/kern/kernel.bin
+$(ISO): $(GRUB_INSTALL)/bin/grub-mkrescue kern/grub.cfg $(OBJDIR)/kern/kernel.bin
 	@mkdir -p $(@D)/iso/boot/grub
 	python kern/mbh_patch.py $(OBJDIR)/kern/kernel.bin
 	@cp $(OBJDIR)/kern/kernel.bin $(@D)/iso/boot
 	@cp kern/grub.cfg $(@D)/iso/boot/grub/
 	$(GRUB_INSTALL)/bin/grub-mkrescue -o $(ISO) $(@D)/iso
+
+grub/configure: $(GRUB_DEPS)
+	(cd grub && ./autogen.sh)
+
+$(GRUB_INSTALL)/bin/grub-mkrescue: grub/configure
+	@mkdir -p $(@D)
+	(cd $(OBJDIR)/grub && \
+		../../grub/configure \
+		BUILD_CC=$(NGCC) \
+		--host=amd64-osx-darwin \
+		CC=$(NGCC) \
+		--target=x86_64 \
+		TARGET_CC=$(TARGET)-gcc \
+		TARGET_OBJCOPY=$(TARGET)-objcopy \
+		TARGET_STRIP=$(TARGET)-strip \
+		TARGET_NM=$(TARGET)-nm \
+		TARGET_RANLIB=$(TARGET)-ranlib \
+		LEX=$(LEX) \
+		--prefix=$(GRUB_INSTALL) \
+		--disable-werror && make && make install)
 
 all: $(ISO)
