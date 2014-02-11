@@ -10,7 +10,7 @@ RUSTC := rustc
 
 CFLAGS := $(CFLAGS) -O1 -I$(TOP)
 
-RUSTFLAGS := -O --target x86_64-linux-gnu --save-temps -Z no-landing-pads
+RUSTFLAGS := -O --target x86_64-linux-gnu -C save-temps -Z no-landing-pads
 RUSTFLAGS += -L $(OBJDIR)/arch -L $(OBJDIR)/rust-std -L $(OBJDIR)/rust-extra
 
 LDFLAGS :=

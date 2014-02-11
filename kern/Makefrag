@@ -19,7 +19,7 @@ LEX := /usr/local/Cellar/flex/2.5.37/bin/flex
 
 $(OBJDIR)/kern/$(LIB_KERN64): $(KERN64_RSFILES) $(KERN64_DEPS)
 	@mkdir -p $(@D)
-	$(RUSTC) $(RUSTFLAGS) --ar $(AR) -Z lto --out-dir $(@D) kern/init.rs
+	$(RUSTC) $(RUSTFLAGS) -C ar=$(AR) -Z lto --out-dir $(@D) kern/init.rs
 
 $(OBJDIR)/kern/kernel.bin: kern/boot_grub.S kern/kernel.ld $(OBJDIR)/kern/$(LIB_KERN64)
 	@mkdir -p $(@D)
